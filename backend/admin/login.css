@@ -1,0 +1,109 @@
+body{
+    margin:0;
+    font-family: 'Segoe UI', sans-serif;
+    background: linear-gradient(rgba(0,80,50,0.7), rgba(0,80,50,0.7)),
+                url('../images/bg.jpg') center/cover no-repeat;
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+.auth-container{
+    background:#ffffff;
+    width:350px;
+    padding:30px;
+    border-radius:14px;
+    box-shadow:0 15px 40px rgba(0,0,0,0.3);
+    text-align:center;
+}
+
+.welcome{
+    color:#1e6f4e;
+    margin-bottom:5px;
+}
+
+.subtitle{
+    color:#555;
+    margin-bottom:20px;
+}
+
+.tabs{
+    display:flex;
+    margin-bottom:20px;
+}
+
+.tab{
+    flex:1;
+    border:none;
+    padding:10px;
+    cursor:pointer;
+    background:#e0efe8;
+    font-weight:600;
+}
+
+.tab.active{
+    background:#1e6f4e;
+    color:white;
+}
+
+.tab-content{
+    display:none;
+    flex-direction:column;
+}
+
+.tab-content.active{
+    display:flex;
+}
+
+input{
+    margin-bottom:12px;
+    padding:10px;
+    border-radius:8px;
+    border:1px solid #ccc;
+}
+
+button{
+    background:#1e6f4e;
+    color:white;
+    border:none;
+    padding:10px;
+    border-radius:8px;
+    cursor:pointer;
+}
+
+button:hover{
+    background:#14513a;
+}
+
+.error{
+    color:red;
+    font-size:14px;
+    margin-top:10px;
+}
+
+/* Tab switching */
+.tab-content {
+    display: none;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.tab-content.active {
+    display: flex;
+}
+
+.tab {
+    padding: 10px 20px;
+    border: none;
+    background: #2c5d2d; /* elegant dark green */
+    color: white;
+    cursor: pointer;
+    border-radius: 5px 5px 0 0;
+    font-weight: bold;
+}
+
+.tab.active {
+    background: #3a7d3a; /* slightly lighter green */
+}

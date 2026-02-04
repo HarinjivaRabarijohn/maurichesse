@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Profile — MauRichesse</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" type="image/png" href="icons/icon-192.png" sizes="192x192">
+<link rel="shortcut icon" href="icons/icon-192.png" type="image/png">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="hamburger-menu.css">
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#0b3d2e">
+</head>
+<body>
+<nav>
+  <a href="home.html" class="brand" aria-label="MauRichesse home">
+    <img src="icons/icon-192.png" alt="MauRichesse logo" class="brand-logo" />
+    <span>MauRichesse</span>
+  </a>
+  <a href="home.html">Explore</a>
+  <a href="scan.html">Scan</a>
+  <a href="visited.html">Visited</a>
+  <a href="profile.html" class="active">Profile</a>
+  <div class="lang-group" style="margin-left:8px;">
+    <label for="clientLangSelect">Language</label>
+    <select id="clientLangSelect">
+      <option value="en">English</option>
+      <option value="fr">Français</option>
+    </select>
+  </div>
+  <a href="index.html" class="logout" onclick="return logout(event);">Logout</a>
+</nav>
+
+<main class="container">
+  <h2 style="margin-top:10px">Profile</h2>
+
+  <!-- Leaderboard (always visible) -->
+  <section class="profile-box" aria-labelledby="leaderboard-heading">
+    <h3 id="leaderboard-heading" style="margin:0 0 12px 0">Leaderboard</h3>
+    <p style="color:var(--muted);margin-bottom:14px;">All explorers ranked by score (visits × 2 + badges × 5 + treasures × 10).</p>
+    <div id="leaderboardTop3" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px;"></div>
+    <div id="leaderboardList" style="display:grid;gap:8px;"></div>
+    <p id="yourPlacement" style="margin-top:14px;font-weight:600;color:var(--accent);"></p>
+  </section>
+
+  <!-- When not logged in -->
+  <div id="profileGuest" class="profile-box" style="display:none;margin-top:20px;">
+    <p style="color:var(--muted);margin:0;">Sign in from the home page to see your profile and badges.</p>
+    <a href="../index.php" style="display:inline-block;margin-top:12px;color:var(--accent);font-weight:600;">Go to home →</a>
+  </div>
+
+  <!-- When logged in: My Profile + My Badges -->
+  <div id="profileContent" style="display:none;">
+  <section class="profile-box" style="margin-top:20px;" aria-labelledby="profile-heading">
+    <h3 id="profile-heading" style="margin:0 0 12px 0">My Profile</h3>
+    <div class="profile-header" style="display:flex;gap:14px;align-items:center;">
+      <div class="avatar" id="profileAvatar" aria-hidden="true"></div>
+      <div style="flex:1;min-width:0">
+        <div id="profileUsername" style="font-size:1.15rem;font-weight:700"></div>
+        <div id="profileEmail" style="color:var(--muted);margin-top:6px"></div>
+        <div style="margin-top:12px;color:var(--muted);" id="profileAbout"></div>
+        <button id="editProfileBtn" style="margin-top:10px;min-width:120px">Edit profile</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="profile-box" style="margin-top:20px;" aria-labelledby="badges-heading">
+    <h3 id="badges-heading" style="margin:0 0 12px 0">My Badges</h3>
+    <p style="color:var(--muted);margin-bottom:14px;">Earn badges by scanning QR codes, finding treasures, and completing trails.</p>
+    <div id="badgesList" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:14px;">
+      <p style="color:var(--muted);grid-column:1/-1;">Loading…</p>
+    </div>
+  </section>
+
+  <!-- Web Push: enable notifications -->
+  <section class="profile-box" style="margin-top:20px;">
+    <h3 style="margin:0 0 8px 0">Notifications</h3>
+    <p style="color:var(--muted);margin-bottom:10px;font-size:0.95rem;">Get notified about new trails and treasure hunt updates.</p>
+    <button id="pushSubscribeBtn" type="button">Enable notifications</button>
+    <p id="pushStatus" style="margin-top:8px;font-size:0.9rem;color:var(--muted);"></p>
+  </section>
+
+  <div style="margin-top:20px;">
+    <a href="visited.html" style="color:var(--accent);text-decoration:none;font-weight:600;">View all visited sites →</a>
+  </div>
+  </div>
+</main>
+
+<div id="clientProfileModal" class="modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="clientProfileTitle">
+  <div class="modal-backdrop" tabindex="-1"></div>
+  <div class="modal-panel" role="document" style="max-width:520px;">
+    <h3 id="clientProfileTitle">Edit profile</h3>
+    <div class="modal-field">
+      <label for="client_profile_username">Username</label>
+      <input id="client_profile_username" type="text" autocomplete="name" />
+    </div>
+    <div class="modal-field">
+      <label for="client_profile_email">Email</label>
+      <input id="client_profile_email" type="email" autocomplete="email" />
+    </div>
+    <div class="modal-field">
+      <label for="client_profile_about">About (short)</label>
+      <textarea id="client_profile_about" rows="3" maxlength="400" placeholder="Who are you? What places do you like?"></textarea>
+    </div>
+    <div class="modal-field">
+      <label for="client_profile_password">Change password (optional)</label>
+      <input id="client_profile_password" type="password" autocomplete="new-password" />
+    </div>
+    <div id="clientProfileError" class="modal-error" aria-live="polite"></div>
+    <div class="modal-actions" style="margin-top:10px;">
+      <button id="clientProfileCancel" type="button" style="background:transparent;color:var(--muted);border:1px solid rgba(255,255,255,0.04);">Cancel</button>
+      <button id="clientProfileSave" type="button">Save</button>
+    </div>
+  </div>
+</div>
+
+<script src="hamburger-menu.js?v=2"></script>
+<script src="config.js?v=2"></script>
+<script src="auth.js?v=2"></script>
+<script src="push.js?v=2"></script>
+<script>
+(function() {
+  var guest = document.getElementById('profileGuest');
+  var content = document.getElementById('profileContent');
+  try {
+    var user = JSON.parse(localStorage.getItem('user') || 'null');
+    if (user && user.user_id) {
+      if (guest) guest.style.display = 'none';
+      if (content) content.style.display = 'block';
+      if (document.getElementById('profileUsername')) document.getElementById('profileUsername').innerText = user.username || '—';
+      if (document.getElementById('profileEmail')) document.getElementById('profileEmail').innerText = user.email || '—';
+      if (document.getElementById('profileAbout')) document.getElementById('profileAbout').innerText = user.about || 'No bio yet.';
+    } else {
+      if (guest) guest.style.display = 'block';
+      if (content) content.style.display = 'none';
+    }
+  } catch (e) {
+    if (guest) guest.style.display = 'block';
+    if (content) content.style.display = 'none';
+  }
+})();
+
+(function loadLeaderboard() {
+  var top3El = document.getElementById('leaderboardTop3');
+  var listEl = document.getElementById('leaderboardList');
+  var placementEl = document.getElementById('yourPlacement');
+  if (!listEl) return;
+  var base = (window.getApiBase ? window.getApiBase() : 'http://localhost/mauheritage/api').replace(/\/+$/, '') + '/';
+  fetch(base + 'leaderboard.php?action=list').then(function(r) { return r.ok ? r.json() : { leaderboard: [] }; }).catch(function() { return { leaderboard: [] }; })
+  .then(function(data) {
+    var list = (data.leaderboard || []);
+    var userStr = localStorage.getItem('user');
+    var me = userStr ? (JSON.parse(userStr).user_id || null) : null;
+    var myRank = 0;
+    list.forEach(function(u, i) { if (me && Number(u.user_id) === Number(me)) myRank = i + 1; });
+
+    if (!list.length) {
+      listEl.innerHTML = '<p style="color:var(--muted);">No players yet. Be the first!</p>';
+      if (placementEl) placementEl.textContent = '';
+      return;
+    }
+
+    var medals = ['\uD83E\uDD47', '\uD83E\uDD48', '\uD83E\uDD49'];
+    if (top3El && list.length >= 1) {
+      top3El.innerHTML = list.slice(0, 3).map(function(u, i) {
+        var rank = i + 1;
+        var isMe = me && Number(u.user_id) === Number(me);
+        return '<div style="text-align:center;padding:14px;background:var(--panel);border-radius:12px;border:2px solid ' + (isMe ? 'var(--accent)' : 'rgba(255,255,255,0.08)') + '">' +
+          '<div style="font-size:2rem;margin-bottom:6px;">' + medals[i] + '</div>' +
+          '<div style="font-weight:700;">#' + rank + '</div>' +
+          '<div style="font-weight:600;margin-top:4px;">' + (u.username || '—') + (isMe ? ' <small style="color:var(--accent)">(you)</small>' : '') + '</div>' +
+          '<div style="color:var(--accent);font-weight:600;margin-top:4px;">' + (u.score || 0) + ' pts</div>' +
+          '</div>';
+      }).join('');
+    }
+
+    listEl.innerHTML = list.map(function(u, i) {
+      var rank = i + 1;
+      var isMe = me && Number(u.user_id) === Number(me);
+      var medal = rank <= 3 ? medals[rank - 1] + ' ' : '';
+      return '<div class="leaderboard-row" style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--panel);border-radius:10px;border-left:4px solid ' + (isMe ? 'var(--accent)' : 'transparent') + '">' +
+        '<span style="font-weight:700;min-width:36px;color:var(--muted)">' + medal + '#' + rank + '</span>' +
+        '<span style="flex:1;font-weight:600">' + (u.username || '—') + (isMe ? ' <small style="color:var(--accent)">(you)</small>' : '') + '</span>' +
+        '<span style="color:var(--accent);font-weight:600">' + (u.score || 0) + ' pts</span>' +
+        '</div>';
+    }).join('');
+
+    if (placementEl) {
+      if (myRank) placementEl.textContent = 'Your placement: #' + myRank + ' of ' + list.length;
+      else placementEl.textContent = 'Sign in to see your placement.';
+    }
+  });
+})();
+
+(function loadBadges() {
+  var list = document.getElementById('badgesList');
+  if (!list) return;
+  var base = (window.getApiBase ? window.getApiBase() : 'http://localhost/mauheritage/api').replace(/\/+$/, '') + '/';
+  Promise.all([
+    fetch(base + 'badge.php?action=list').then(function(r) { return r.ok ? r.json() : []; }).catch(function() { return []; }),
+    (function() {
+      try {
+        var u = localStorage.getItem('user');
+        var user = u ? JSON.parse(u) : null;
+        var uid = user && user.user_id ? user.user_id : 0;
+        if (!uid) return Promise.resolve([]);
+        return fetch(base + 'badge.php?action=user_badges&user_id=' + uid).then(function(r) { return r.ok ? r.json() : []; }).catch(function() { return []; });
+      } catch (e) { return Promise.resolve([]); }
+    })()
+  ]).then(function(arr) {
+    var badges = arr[0] || [];
+    var earned = arr[1] || [];
+    var earnedIds = earned.map(function(b) { return b.badge_id; });
+    if (!badges.length) { list.innerHTML = '<p style="color:var(--muted);grid-column:1/-1;">No badges yet. Explore and scan to earn!</p>'; return; }
+    list.innerHTML = badges.map(function(b) {
+      var has = earnedIds.indexOf(b.badge_id) >= 0;
+      return '<div class="badge-card" style="text-align:center;padding:12px;background:var(--panel);border-radius:12px;border:2px solid ' + (has ? 'var(--accent)' : 'rgba(255,255,255,0.06)') + '">' +
+        '<div style="width:56px;height:56px;margin:0 auto 8px;border-radius:50%;background:' + (has ? 'var(--accent)' : 'rgba(255,255,255,0.08)') + ';display:flex;align-items:center;justify-content:center;font-size:28px;">' + (has ? '🏅' : '🔒') + '</div>' +
+        '<strong style="font-size:0.95rem">' + (b.name || 'Badge') + '</strong>' +
+        (b.description ? '<p style="margin:6px 0 0;font-size:0.85rem;color:var(--muted)">' + b.description + '</p>' : '') +
+        (has ? '<small style="color:var(--accent)">Earned</small>' : '') +
+        '</div>';
+    }).join('');
+  });
+})();
+
+var editBtn = document.getElementById('editProfileBtn');
+if (editBtn) editBtn.addEventListener('click', function() { if (window.openClientProfileModal) openClientProfileModal(); });
+var cancelBtn = document.getElementById('clientProfileCancel');
+if (cancelBtn) cancelBtn.addEventListener('click', function() { document.getElementById('clientProfileModal').setAttribute('aria-hidden', 'true'); });
+var saveBtn = document.getElementById('clientProfileSave');
+if (saveBtn) saveBtn.addEventListener('click', function() { if (window.saveClientProfile) saveClientProfile(); });
+var backdrop = document.querySelector('#clientProfileModal .modal-backdrop');
+if (backdrop) backdrop.addEventListener('click', function() { document.getElementById('clientProfileModal').setAttribute('aria-hidden', 'true'); });
+</script>
+
+<a class="home-quick" href="home.html" title="Home">🏠</a>
+</body>
+</html>

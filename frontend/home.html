@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>MauRichesse</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" type="image/png" href="icons/icon-192.png" sizes="192x192">
+<link rel="shortcut icon" href="icons/icon-192.png" type="image/png">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="hamburger-menu.css">
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#0b3d2e">
+
+<!-- Leaflet (map) assets -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</head>
+<body>
+
+<div id="splashScreen" class="splash-screen" aria-hidden="false">
+  <div class="splash-overlay">
+    <img src="icons/icon-192.png" alt="MauRichesse logo" class="splash-logo" />
+    <div class="splash-title">MauRichesse</div>
+  </div>
+</div>
+
+<nav>
+  <a href="home.html" class="brand" aria-label="MauRichesse home">
+    <img src="icons/icon-192.png" alt="MauRichesse logo" class="brand-logo" />
+    <span>MauRichesse</span>
+  </a>
+  <a href="home.html" class="active">Explore</a>
+  <a href="scan.html">Scan</a>
+  <a href="visited.html">Visited</a>
+  <a href="profile.html">Profile</a>
+  <div class="lang-group" style="margin-left:8px;">
+    <label for="clientLangSelect">Language</label>
+    <select id="clientLangSelect">
+      <option value="en">English</option>
+      <option value="fr">Français</option>
+    </select>
+  </div>
+  <button id="mapStyleToggle" aria-label="Toggle map style" title="Toggle map style" style="background:transparent;border:0;color:var(--ivory);cursor:pointer;font-size:18px;">🗺️</button>
+  <a href="index.html" class="logout" onclick="return logout(event);">Logout</a>
+</nav>
+
+<div class="container">
+  <div class="map-wrap" style="position:relative;">
+    <div id="map">Loading map…</div>
+    <button type="button" id="centerOnMeBtn" aria-label="Center on my location" title="My location" style="position:absolute;bottom:16px;right:16px;z-index:1000;width:44px;height:44px;border-radius:50%;background:var(--accent);color:#081428;border:none;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.3);font-size:18px;">📍</button>
+  </div>
+  <div class="grid" id="locations"></div>
+</div>
+
+<!-- Location detail modal -->
+<div id="locationDetailModal" class="modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="locationDetailTitle">
+  <div class="modal-backdrop" tabindex="-1"></div>
+  <div class="modal-panel" role="document" style="max-width:780px; width:calc(100% - 24px);">
+    <div style="display:flex;gap:16px;align-items:flex-start;">
+      <div style="flex:0 0 220px;max-width:220px;">
+        <img id="locationDetailImage" src="" alt="" style="width:100%;height:160px;object-fit:cover;border-radius:10px;box-shadow:0 8px 28px rgba(0,0,0,0.4)" />
+        <div style="margin-top:10px;display:flex;gap:8px;">
+          <button id="locationShowOnMap" style="flex:1">Show on map</button>
+          <button id="locationCloseBtn" style="background:transparent;color:var(--muted);border:1px solid rgba(255,255,255,0.04);">Close</button>
+        </div>
+      </div>
+      <div style="flex:1;min-width:0">
+        <h3 id="locationDetailTitle">Location name</h3>
+        <div id="locationDetailMeta" style="color:var(--muted);margin-bottom:8px">Category • coordinates • address</div>
+        <div id="locationDetailDescription" style="margin-bottom:12px;color:var(--ivory);line-height:1.45"></div>
+        <div id="locationDetailExtras" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px"></div>
+        <div id="locationRelated" style="margin-top:14px"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="config.js?v=2"></script>
+<script src="hamburger-menu.js?v=2"></script>
+<script src="app.js?v=2"></script>
+<script src="auth.js?v=2"></script>
+</body>
+</html>

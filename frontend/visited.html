@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Visited — MauRichesse</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" type="image/png" href="icons/icon-192.png" sizes="192x192">
+<link rel="shortcut icon" href="icons/icon-192.png" type="image/png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<nav>
+  <a href="home.html" class="brand" aria-label="MauRichesse home">
+    <img src="icons/icon-192.png" alt="MauRichesse logo" class="brand-logo" />
+    <span>MauRichesse</span>
+  </a>
+  <a href="home.html">Explore</a>
+  <a href="scan.html">Scan</a>
+  <a href="visited.html" class="active">Visited</a>
+  <a href="profile.html">Profile</a>
+  <div class="lang-group" style="margin-left:8px;"><label for="clientLangSelect">Language</label><select id="clientLangSelect"><option value="en">English</option><option value="fr">Français</option></select></div>
+  <a href="index.html" class="logout" onclick="return logout(event);">Logout</a>
+</nav>
+
+<main class="container" style="max-width:1100px;margin:20px auto;">
+  <h2>Visited Sites</h2>
+  <p style="color:var(--muted)">Sites you scanned using the app are saved locally. Tap an entry to see details or show on the map.</p>
+
+  <div style="display:grid;grid-template-columns:1fr 360px;gap:20px;margin-top:18px;">
+    <div>
+      <div id="visitedListMain" class="card" style="padding:0;border-radius:12px;overflow:hidden;min-height:180px;">
+        <div id="visitedItems" style="padding:14px">No visited sites yet.</div>
+        <div style="padding:12px;border-top:1px solid rgba(255,255,255,0.03);display:flex;gap:8px;justify-content:flex-end;background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);">
+          <button id="clearVisitedBtn" style="background:transparent;color:var(--muted);border:1px solid rgba(255,255,255,0.04);padding:8px 12px;border-radius:10px;">Clear history</button>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="card" style="padding:12px;min-height:300px;">
+        <div id="visitedMap" style="height:280px;border-radius:10px;overflow:hidden;background:linear-gradient(180deg,#021227,#02182b);display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0.6);">Map preview</div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script src="config.js?v=2"></script>
+<script src="app.js?v=2"></script>
+<script src="auth.js?v=2"></script>
+<script>
+// render visited list on this page
+async function renderVisitedOnVisitedPage(){
+  const listEl = document.getElementById('visitedItems');
+  const base = (window.getApiBase ? window.getApiBase() : 'http://localhost/mauheritage/backend/api').replace(/\/+$/, '');
+
+  // Try server-side visited list (with points)
+  try {
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    if (user && user.user_id) {
+      const resp = await fetch(base + '/visit.php?action=user_visited&user_id=' + encodeURIComponent(user.user_id));
+      const data = await resp.json();
+      if (data && data.success && Array.isArray(data.visited) && data.visited.length) {
+        listEl.innerHTML = data.visited.map((v) => `
+          <div class="visited-row" data-location-id="${v.location_id}" style="padding:12px;border-bottom:1px solid rgba(255,255,255,0.03);display:flex;justify-content:space-between;gap:12px;align-items:flex-start;">
+            <div style="min-width:0">
+              <strong style="display:block;color:var(--accent)">${v.location_name || 'Unknown location'}</strong>
+              <div style="color:var(--muted);margin-top:6px">Points earned: <span style="color:#2ecc71;font-weight:600">${v.total_points || 0}</span></div>
+              <small style="display:block;margin-top:6px;opacity:0.7">${v.first_visit ? new Date(v.first_visit).toLocaleString() : ''}</small>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end">
+              <button class="showOnMapBtn" data-lat="${v.latitude || ''}" data-lng="${v.longitude || ''}" data-name="${v.location_name || ''}" style="background:transparent;color:var(--ivory);border:1px solid rgba(255,255,255,0.06);padding:6px 10px;border-radius:8px;">Show on map</button>
+            </div>
+          </div>
+        `).join('');
+
+        document.querySelectorAll('.showOnMapBtn').forEach(b=> b.addEventListener('click', () => {
+          const lat = parseFloat(b.dataset.lat);
+          const lng = parseFloat(b.dataset.lng);
+          const name = b.dataset.name || '';
+          if (isNaN(lat) || isNaN(lng)) return;
+          const mapHandle = window._mau_map || (window._mau_map = (window.ensureMap && window.ensureMap().map));
+          if (mapHandle) {
+            mapHandle.setView([lat, lng], 15);
+            L.marker([lat, lng], { icon: (window.createPinIcon?window.createPinIcon('#2bb3c0'):null) }).addTo(mapHandle).bindPopup(`<b>${name}</b>`).openPopup();
+          }
+        }));
+        return;
+      }
+    }
+  } catch (e) {
+    // fall through to local storage
+  }
+
+  // Fallback to local storage
+  const scans = JSON.parse(localStorage.getItem('mau_scans')||'[]');
+  if(!scans.length){ listEl.innerHTML = '<p style="opacity:0.8">No sites visited yet.</p>'; return; }
+  listEl.innerHTML = scans.map((s, idx)=>`
+    <div class="visited-row" data-code="${s.code}" style="padding:12px;border-bottom:1px solid rgba(255,255,255,0.03);display:flex;justify-content:space-between;gap:12px;align-items:flex-start;">
+      <div style="min-width:0">
+        <strong style="display:block;color:var(--accent)">${s.code}</strong>
+        <div style="color:var(--muted);margin-top:6px">${s.fact || ''}</div>
+        <small style="display:block;margin-top:6px;opacity:0.7">${new Date(s.at).toLocaleString()}</small>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end">
+        <button class="showOnMapBtn" data-code="${s.code}" style="background:transparent;color:var(--ivory);border:1px solid rgba(255,255,255,0.06);padding:6px 10px;border-radius:8px;">Show on map</button>
+        <button class="removeScanBtn" data-idx="${idx}" style="background:transparent;color:var(--muted);border:0;padding:6px 10px;">Remove</button>
+      </div>
+    </div>
+  `).join('');
+
+  // wire buttons
+  document.querySelectorAll('.removeScanBtn').forEach(b=> b.addEventListener('click', e=>{ const i = Number(b.dataset.idx); const scans = JSON.parse(localStorage.getItem('mau_scans')||'[]'); scans.splice(i,1); localStorage.setItem('mau_scans', JSON.stringify(scans)); renderVisitedOnVisitedPage(); document.dispatchEvent(new CustomEvent('scans:changed',{detail:scans})); }));
+  document.querySelectorAll('.showOnMapBtn').forEach(b=> b.addEventListener('click', async e=>{
+    const code = b.dataset.code;
+    // try to resolve QR -> location via API
+    try{
+      const qrs = await fetch(base + '/qr.php?action=list').then(r=>r.json());
+      const found = qrs.find(q=>q.qr_code === code);
+      if(found && found.location_id){
+        const locs = await fetch(base + '/location.php?action=list').then(r=>r.json());
+        const loc = locs.find(l=>String(l.location_id) === String(found.location_id));
+        if(loc && loc.latitude && loc.longitude){
+          const mapHandle = window._mau_map || (window._mau_map = (window.ensureMap && window.ensureMap().map));
+          if(mapHandle){ mapHandle.setView([loc.latitude, loc.longitude], 15); L.marker([loc.latitude, loc.longitude], { icon: (window.createPinIcon?window.createPinIcon('#2bb3c0'):null) }).addTo(mapHandle).bindPopup(`<b>${loc.name}</b>`).openPopup(); }
+          return;
+        }
+      }
+      alert('Location for this code not found on the server.');
+    }catch(err){ console.error(err); alert('Failed to resolve location'); }
+  }));
+}
+
+// init
+document.addEventListener('DOMContentLoaded', ()=>{
+  renderVisitedOnVisitedPage();
+  document.getElementById('clearVisitedBtn').addEventListener('click', ()=>{ if(confirm('Clear visited history?')){ localStorage.removeItem('mau_scans'); renderVisitedOnVisitedPage(); document.dispatchEvent(new CustomEvent('scans:changed',{detail:[]})); } });
+  // initialize a small map preview by ensuring app.js map exists and copying to the preview container
+  const mh = window.ensureMap && window.ensureMap();
+  if(mh){
+    const map = mh.map;
+    // move the map container into preview for this page
+    try{
+      const preview = document.getElementById('visitedMap');
+      if(preview){
+        // create a new map instance for preview to avoid moving the main map
+        const mini = L.map(preview, { center: map.getCenter(), zoom: map.getZoom(), layers: [window._mau_layers?window._mau_layers.OSM:null].filter(Boolean) });
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(mini);
+        // add markers from stored scans if resolvable
+      }
+    }catch(e){ /* ignore */ }
+  }
+});
+</script>
+</body>
+</html> 

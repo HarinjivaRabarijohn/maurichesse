@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>MauRichesse - Quick Test</title>
+    <style>
+        body { font-family: Arial; margin: 20px; background: #f5f5f5; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .success { color: green; font-weight: bold; }
+        .error { color: red; font-weight: bold; }
+        .info { color: blue; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; background: #1e6f4e; color: white; border: none; border-radius: 5px; }
+        button:hover { background: #14513a; }
+        .output { background: #f9f9f9; border-left: 3px solid #1e6f4e; padding: 10px; margin: 10px 0; font-family: monospace; }
+        textarea { width: 100%; height: 200px; font-family: monospace; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>🔧 MauRichesse Quick Test</h1>
+    
+    <div class="test-section">
+        <h2>1. Check Page Load</h2>
+        <p>Current URL: <strong id="currentUrl"></strong></p>
+        <p>Hostname: <strong id="hostname"></strong></p>
+        <button onclick="checkPage()">Check Page Status</button>
+        <div id="pageOutput"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>2. Test API Endpoints</h2>
+        <p>API Base: <strong id="apiBase">http://localhost/mauheritage/api</strong></p>
+        <button onclick="testEndpoint('/test_connection.php')">Test Connection</button>
+        <button onclick="testEndpoint('/user_login.php', {identifier: 'test', password: 'test'})">Test Login Endpoint</button>
+        <button onclick="testEndpoint('/user_register.php', {username: 'test', email: 'test@test.com', password: 'test'})">Test Register Endpoint</button>
+        <div id="apiOutput"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>3. Test Login Form</h2>
+        <input type="text" id="testUsername" placeholder="Username/Email" style="width: 100%; padding: 8px; margin: 5px 0;">
+        <input type="password" id="testPassword" placeholder="Password" style="width: 100%; padding: 8px; margin: 5px 0;">
+        <button onclick="testLogin()">Test Login Form</button>
+        <div id="loginOutput"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>4. Test Registration Form</h2>
+        <input type="text" id="testRegUsername" placeholder="Username" style="width: 100%; padding: 8px; margin: 5px 0;">
+        <input type="email" id="testRegEmail" placeholder="Email" style="width: 100%; padding: 8px; margin: 5px 0;">
+        <input type="password" id="testRegPassword" placeholder="Password" style="width: 100%; padding: 8px; margin: 5px 0;">
+        <button onclick="testRegister()">Test Registration Form</button>
+        <div id="registerOutput"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>5. LocalStorage</h2>
+        <button onclick="checkStorage()">Check Storage</button>
+        <button onclick="clearStorage()">Clear Storage</button>
+        <div id="storageOutput"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>6. Browser Info</h2>
+        <textarea id="debugInfo" readonly></textarea>
+    </div>
+</div>
+
+<script>
+const apiBase = 'http://localhost/mauheritage/backend/api';
+
+// Initialize page
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('currentUrl').innerText = window.location.href;
+    document.getElementById('hostname').innerText = window.location.hostname;
+    checkPage();
+    checkStorage();
+    debugInfo();
+});
+
+function log(elementId, message, type = 'info') {
+    const el = document.getElementById(elementId);
+    const div = document.createElement('div');
+    div.className = type;
+    div.innerText = `[${type.toUpperCase()}] ${message}`;
+    el.appendChild(div);
+    console.log(`[${type}]`, message);
+}
+
+function checkPage() {
+    const output = document.getElementById('pageOutput');
+    output.innerHTML = '';
+    log('pageOutput', `Page loaded successfully at ${new Date().toLocaleTimeString()}`, 'success');
+    log('pageOutput', `API Base configured as: ${apiBase}`, 'info');
+}
+
+function testEndpoint(path, data = null) {
+    const output = document.getElementById('apiOutput');
+    output.innerHTML = '';
+    const fullUrl = apiBase + path;
+    
+    log('apiOutput', `Testing: ${fullUrl}`, 'info');
+    
+    const options = {
+        method: data ? 'POST' : 'GET',
+        headers: {'Content-Type': 'application/json'}
+    };
+    
+    if (data) {
+        options.body = JSON.stringify(data);
+    }
+    
+    fetch(fullUrl, options)
+        .then(res => {
+            log('apiOutput', `Response status: ${res.status} ${res.statusText}`, 'info');
+            return res.text();
+        })
+        .then(text => {
+            log('apiOutput', `Response body: ${text}`, 'success');
+            try {
+                const json = JSON.parse(text);
+                log('apiOutput', `Parsed JSON: ${JSON.stringify(json, null, 2)}`, 'info');
+            } catch (e) {
+                log('apiOutput', `Could not parse as JSON: ${e.message}`, 'error');
+            }
+        })
+        .catch(err => {
+            log('apiOutput', `Request failed: ${err.message}`, 'error');
+        });
+}
+
+function testLogin() {
+    const output = document.getElementById('loginOutput');
+    output.innerHTML = '';
+    const username = document.getElementById('testUsername').value;
+    const password = document.getElementById('testPassword').value;
+    
+    if (!username || !password) {
+        log('loginOutput', 'Enter username and password', 'error');
+        return;
+    }
+    
+    log('loginOutput', `Attempting login for: ${username}`, 'info');
+    
+    fetch(apiBase + '/user_login.php', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({identifier: username, password: password})
+    })
+    .then(res => {
+        log('loginOutput', `Response status: ${res.status}`, 'info');
+        return res.json();
+    })
+    .then(data => {
+        if (data.success) {
+            log('loginOutput', `Login successful! User ID: ${data.user_id}`, 'success');
+            localStorage.setItem('user', JSON.stringify(data));
+            log('loginOutput', `User stored in localStorage`, 'success');
+        } else {
+            log('loginOutput', `Login failed: ${data.error}`, 'error');
+        }
+        log('loginOutput', `Full response: ${JSON.stringify(data)}`, 'info');
+    })
+    .catch(err => {
+        log('loginOutput', `Error: ${err.message}`, 'error');
+    });
+}
+
+function testRegister() {
+    const output = document.getElementById('registerOutput');
+    output.innerHTML = '';
+    const username = document.getElementById('testRegUsername').value;
+    const email = document.getElementById('testRegEmail').value;
+    const password = document.getElementById('testRegPassword').value;
+    
+    if (!username || !email || !password) {
+        log('registerOutput', 'Fill all fields', 'error');
+        return;
+    }
+    
+    log('registerOutput', `Attempting registration for: ${username}`, 'info');
+    
+    fetch(apiBase + '/user_register.php', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({username, email, password})
+    })
+    .then(res => {
+        log('registerOutput', `Response status: ${res.status}`, 'info');
+        return res.json();
+    })
+    .then(data => {
+        if (data.success) {
+            log('registerOutput', `Registration successful! User ID: ${data.user_id}`, 'success');
+        } else {
+            log('registerOutput', `Registration failed: ${data.error}`, 'error');
+        }
+        log('registerOutput', `Full response: ${JSON.stringify(data)}`, 'info');
+    })
+    .catch(err => {
+        log('registerOutput', `Error: ${err.message}`, 'error');
+    });
+}
+
+function checkStorage() {
+    const output = document.getElementById('storageOutput');
+    output.innerHTML = '';
+    const user = localStorage.getItem('user');
+    if (user) {
+        const userData = JSON.parse(user);
+        log('storageOutput', `User logged in: ${userData.username} (ID: ${userData.user_id})`, 'success');
+    } else {
+        log('storageOutput', 'No user in localStorage', 'info');
+    }
+}
+
+function clearStorage() {
+    localStorage.removeItem('user');
+    log('storageOutput', 'LocalStorage cleared', 'success');
+    checkStorage();
+}
+
+function debugInfo() {
+    const info = {
+        'User Agent': navigator.userAgent,
+        'Platform': navigator.platform,
+        'Language': navigator.language,
+        'Online': navigator.onLine,
+        'LocalStorage Available': checkLocalStorageAvailable(),
+        'URL': window.location.href,
+        'API Base': apiBase,
+        'Window Width': window.innerWidth,
+        'Window Height': window.innerHeight
+    };
+    
+    document.getElementById('debugInfo').value = JSON.stringify(info, null, 2);
+}
+
+function checkLocalStorageAvailable() {
+    try {
+        const test = '__test__';
+        localStorage.setItem(test, test);
+        localStorage.removeItem(test);
+        return true;
+    } catch (e) {
+        return false;
+    }
+}
+</script>
+</body>
+</html>

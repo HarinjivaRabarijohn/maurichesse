@@ -1,0 +1,65 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "MauHeritage Backend API",
+    "description": "Backend services for Mobile Guide & Treasure Hunt Application - all tables",
+    "version": "2.0.0"
+  },
+  "servers": [
+    { "url": "http://localhost/mauheritage/api", "description": "Local WAMP Server" }
+  ],
+  "paths": {
+    "/admin.php": { "$ref": "#/components/admin" },
+    "/category.php": { "$ref": "#/components/category" },
+    "/location.php": { "$ref": "#/components/location" },
+    "/qr.php": { "$ref": "#/components/qr" },
+    "/fun_fact.php": { "$ref": "#/components/fun_fact" },
+    "/gallery.php": { "$ref": "#/components/gallery" },
+    "/user.php": { "$ref": "#/components/user" },
+    "/trail.php": { "$ref": "#/components/trail" },
+    "/hidden_item.php": { "$ref": "#/components/hidden_item" },
+    "/badge.php": { "$ref": "#/components/badge" }
+  },
+  "components": {
+    "admin": {
+      "get": { "summary": "List admins", "parameters": [{"name":"action","in":"query","required":true,"schema":{"type":"string","enum":["list"]}}], "responses":{"200":{"description":"List of admins"}} },
+      "post": { "summary":"Add/update/delete/login admin","parameters":[{"name":"action","in":"query","required":true,"schema":{"type":"string","enum":["add","update","delete","login"]}}], "requestBody":{"required":true,"content":{"application/json":{"example":{"admin_id":1,"username":"admin2","email":"admin@domain.com","password":"123456"}}}}, "responses":{"200":{"description":"Admin operation result"}} }
+    },
+    "category": {
+      "get": { "summary":"List categories","parameters":[{"name":"action","in":"query","required":true,"schema":{"type":"string","enum":["list"]}}], "responses":{"200":{"description":"List of categories"}} },
+      "post": { "summary":"Add/update/delete category","parameters":[{"name":"action","in":"query","required":true,"schema":{"type":"string","enum":["add","update","delete"]}}], "requestBody":{"required":true,"content":{"application/json":{"example":{"category_id":1,"category_name":"Historical"}}}}, "responses":{"200":{"description":"Category operation result"}} }
+    },
+    "location": {
+      "get": { "summary":"List locations","parameters":[{"name":"action","in":"query","required":true,"schema":{"type":"string","enum":["list"]}}], "responses":{"200":{"description":"List of locations"}} },
+      "post": { "summary":"Add/update/delete location","parameters":[{"name":"action","in":"query","required":true,"schema":{"type":"string","enum":["add","update","delete"]}}], "requestBody":{"required":true,"content":{"application/json":{"example":{"location_id":1,"name":"Aapravasi Ghat","description":"UNESCO site","latitude":-20.16,"longitude":57.5,"category_id":2,"history":"...","image":"image.jpg","address":"Port Louis"}}}}, "responses":{"200":{"description":"Location operation result"}} }
+    },
+    "qr": {
+      "get": { "summary":"List QR codes or scan by code","parameters":[{"name":"action","in":"query","required":true,"schema":{"type":"string","enum":["list","scan"]}},{"name":"code","in":"query","required":false,"schema":{"type":"string"},"description":"QR code value (for action=scan)"}], "responses":{"200":{"description":"List of QR codes or scan result (location, riddle, hint)"}} },
+      "post": { "summary":"Add/update/delete QR","parameters":[{"name":"action","in":"query","required":true,"schema":{"type":"string","enum":["add","update","delete"]}}], "requestBody":{"required":true,"content":{"application/json":{"example":{"qr_id":1,"qr_code":"QR123456","location_id":2}}}}, "responses":{"200":{"description":"QR operation result"}} }
+    },
+    "fun_fact": {
+      "get": { "summary":"List riddles & hints (by QR)","parameters":[{"name":"action","in":"query","required":true,"schema":{"type":"string","enum":["list"]}}], "responses":{"200":{"description":"List of riddles/hints (fact_text, hint_text)"}} },
+      "post": { "summary":"Add/update/delete riddles","parameters":[{"name":"action","in":"query","required":true,"schema":{"type":"string","enum":["add","update","delete"]}}], "requestBody":{"required":true,"content":{"application/json":{"example":{"fun_fact_id":1,"qr_id":1,"fact_text":"Riddle text","hint_text":"Hint text"}}}}, "responses":{"200":{"description":"Riddle operation result"}} }
+    },
+    "gallery": {
+      "get": { "summary":"List gallery items","parameters":[{"name":"action","in":"query","required":true,"schema":{"type":"string","enum":["list"]}}], "responses":{"200":{"description":"List of gallery images"}} },
+      "post": { "summary":"Add/update/delete gallery","parameters":[{"name":"action","in":"query","required":true,"schema":{"type":"string","enum":["add","update","delete"]}}], "requestBody":{"required":true,"content":{"application/json":{"example":{"gallery_id":1,"location_id":1,"image_path":"img.jpg","caption":"View"}}}}, "responses":{"200":{"description":"Gallery operation result"}} }
+    },
+    "user": {
+      "get": { "summary":"List users","parameters":[{"name":"action","in":"query","required":true,"schema":{"type":"string","enum":["list"]}}], "responses":{"200":{"description":"List of users"}} },
+      "post": { "summary":"Add/update/delete users","parameters":[{"name":"action","in":"query","required":true,"schema":{"type":"string","enum":["add","update","delete"]}}], "requestBody":{"required":true,"content":{"application/json":{"example":{"user_id":1,"username":"user1","email":"user@mail.com","password":"123456"}}}}, "responses":{"200":{"description":"User operation result"}} }
+    },
+    "trail": {
+      "get": { "summary":"List trails","parameters":[{"name":"action","in":"query","required":true,"schema":{"type":"string","enum":["list"]}}], "responses":{"200":{"description":"List of trails"}} },
+      "post": { "summary":"Add/update/delete trail","parameters":[{"name":"action","in":"query","required":true,"schema":{"type":"string","enum":["add","update","delete"]}}], "requestBody":{"required":true,"content":{"application/json":{"example":{"trail_id":1,"trail_name":"Heritage Walk","description":"...","start_lat":-20.16,"start_lng":57.5,"end_lat":-20.17,"end_lng":57.52}}}}, "responses":{"200":{"description":"Trail operation result"}} }
+    },
+    "hidden_item": {
+      "get": { "summary":"List hidden items","parameters":[{"name":"action","in":"query","required":true,"schema":{"type":"string","enum":["list"]}}], "responses":{"200":{"description":"List of hidden items"}} },
+      "post": { "summary":"Add/update/delete/claim hidden item","parameters":[{"name":"action","in":"query","required":true,"schema":{"type":"string","enum":["add","update","delete","claim"]}}], "requestBody":{"required":true,"content":{"application/json":{"example":{"item_id":1,"user_id":1,"latitude":-20.16,"longitude":57.5}}}}, "responses":{"200":{"description":"Hidden item operation result"}} }
+    },
+    "badge": {
+      "get": { "summary":"List badges or user badges","parameters":[{"name":"action","in":"query","required":true,"schema":{"type":"string","enum":["list","user_badges"]}},{"name":"user_id","in":"query","required":false,"schema":{"type":"integer"}}], "responses":{"200":{"description":"List of badges or user's earned badges"}} },
+      "post": { "summary":"Add/update/delete badge","parameters":[{"name":"action","in":"query","required":true,"schema":{"type":"string","enum":["add","update","delete"]}}], "requestBody":{"required":true,"content":{"application/json":{"example":{"badge_id":1,"name":"First Finder","description":"...","criteria_type":"first_finder"}}}}, "responses":{"200":{"description":"Badge operation result"}} }
+    }
+  }
+}

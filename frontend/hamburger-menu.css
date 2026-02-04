@@ -1,0 +1,246 @@
+/* Collapsible 3-bar menu styles */
+.hamburger-menu {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 2000;
+  background: var(--panel, rgba(0,0,0,0.8));
+  border-radius: 8px;
+  padding: 8px;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+.hamburger-btn {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 24px;
+  height: 18px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.hamburger-btn span {
+  display: block;
+  height: 2px;
+  background: var(--ivory, #fff);
+  border-radius: 1px;
+  transition: all 0.3s ease;
+}
+
+.hamburger-btn.active span:nth-child(1) {
+  transform: rotate(45deg) translate(5px, 5px);
+}
+
+.hamburger-btn.active span:nth-child(2) {
+  opacity: 0;
+}
+
+.hamburger-btn.active span:nth-child(3) {
+  transform: rotate(-45deg) translate(7px, -6px);
+}
+
+.side-nav {
+  position: fixed;
+  top: 0;
+  left: -280px;
+  width: 280px;
+  height: 100vh;
+  background: var(--panel, rgba(0,0,0,0.95));
+  backdrop-filter: blur(10px);
+  transition: left 0.3s ease;
+  z-index: 1999;
+  border-right: 1px solid rgba(255,255,255,0.1);
+}
+
+.side-nav.active {
+  left: 0;
+}
+
+.side-nav-header {
+  padding: 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.side-nav-header h2 {
+  margin: 0;
+  color: var(--ivory);
+  font-size: 1.2rem;
+}
+
+.side-nav-content {
+  padding: 20px;
+}
+
+.side-nav-links {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.side-nav-links a {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  color: var(--ivory);
+  text-decoration: none;
+  border-radius: 8px;
+  transition: background 0.2s ease;
+}
+
+.side-nav-links a:hover,
+.side-nav-links a.active {
+  background: rgba(255,255,255,0.1);
+}
+
+.side-nav-links a.active {
+  background: var(--accent, #bfa86a);
+}
+
+.side-nav-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0,0,0,0.5);
+  z-index: 1998;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+}
+
+.side-nav-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Adjust main nav to be hidden when side nav is active */
+nav {
+  transition: transform 0.3s ease;
+}
+
+nav.side-nav-active {
+  transform: translateX(-100%);
+}
+
+/* Trail styles on map */
+.leaflet-trail-line {
+  stroke: var(--accent, #bfa86a);
+  stroke-width: 4;
+  stroke-opacity: 0.8;
+  fill: none;
+  stroke-dasharray: 8, 4;
+  animation: dash 20s linear infinite;
+}
+
+@keyframes dash {
+  to {
+    stroke-dashoffset: -100;
+  }
+}
+
+.leaflet-trail-marker {
+  background: var(--accent, #bfa86a);
+  border: 3px solid #fff;
+  border-radius: 50%;
+  width: 12px;
+  height: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+/* Enhanced badge styles */
+.badge-card.locked {
+  opacity: 0.6;
+  filter: grayscale(80%);
+}
+
+.badge-card.locked:hover {
+  opacity: 0.8;
+  filter: grayscale(60%);
+}
+
+.no-badges-message {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--muted);
+  background: var(--panel);
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.05);
+}
+
+.no-badges-message .icon {
+  font-size: 3rem;
+  margin-bottom: 12px;
+  opacity: 0.5;
+}
+
+/* Hint progression styles */
+.hint-container {
+  margin: 12px 0;
+}
+
+.hint-btn {
+  background: rgba(191,168,106,0.2);
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  margin: 4px 4px 4px 0;
+  transition: all 0.2s ease;
+}
+
+.hint-btn:hover {
+  background: rgba(191,168,106,0.3);
+}
+
+.hint-btn.revealed {
+  background: var(--accent);
+  color: #000;
+}
+
+.hint-content {
+  background: rgba(191,168,106,0.15);
+  border-left: 3px solid var(--accent);
+  padding: 12px;
+  margin: 8px 0;
+  border-radius: 0 6px 6px 0;
+  display: none;
+}
+
+.hint-content.revealed {
+  display: block;
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .side-nav {
+    width: 100%;
+    left: -100%;
+  }
+  
+  .hamburger-menu {
+    top: 8px;
+    left: 8px;
+  }
+}

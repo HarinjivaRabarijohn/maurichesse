@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>MauRichesse - Debug Test</title>
+<link rel="stylesheet" href="login.css">
+<script src="config.js"></script>
+<style>
+    body { background: #f0f0f0; }
+    .debug-container { background: white; width: 600px; margin: 50px auto; padding: 20px; border-radius: 10px; }
+    .debug-box { background: #f9f9f9; padding: 10px; margin: 10px 0; border-left: 3px solid #1e6f4e; }
+    .error { color: red; }
+    .success { color: green; }
+    .info { color: #333; }
+    button { margin: 5px; padding: 10px 15px; }
+</style>
+</head>
+<body>
+<div class="debug-container">
+    <h1>MauRichesse Debug Test</h1>
+    
+    <div class="debug-box">
+        <h3>API Configuration</h3>
+        <p><strong>API Base:</strong> <span id="apiBase">http://localhost/mauheritage/backend/api</span></p>
+        <p><strong>LocalStorage User:</strong> <span id="storageUser">None</span></p>
+    </div>
+
+    <div class="debug-box">
+        <h3>Connectivity Tests</h3>
+        <button onclick="testAPI()">Test API Connection</button>
+        <button onclick="testLogin()">Test Login Endpoint</button>
+        <button onclick="testRegister()">Test Register Endpoint</button>
+        <button onclick="clearStorage()">Clear LocalStorage</button>
+        <div id="testResults"></div>
+    </div>
+
+    <div class="debug-box">
+        <h3>Quick Actions</h3>
+        <button onclick="goToAuth()">Go to Auth Page</button>
+        <button onclick="goToHome()">Go to Home Page</button>
+    </div>
+</div>
+
+<script>
+// Get API base on page load
+document.addEventListener('DOMContentLoaded', () => {
+    const base = (window.getApiBase ? window.getApiBase() : 'http://localhost/mauheritage/api');
+    document.getElementById('apiBase').innerText = base;
+    
+    const user = localStorage.getItem('user');
+    document.getElementById('storageUser').innerText = user ? JSON.parse(user).username : 'None';
+});
+
+function log(msg, type = 'info') {
+    const results = document.getElementById('testResults');
+    const div = document.createElement('div');
+    div.className = type;
+    div.style.marginTop = '10px';
+    div.innerHTML = `<strong>${type.toUpperCase()}:</strong> ${msg}`;
+    results.appendChild(div);
+    console.log(`[${type}] ${msg}`);
+}
+
+function testAPI() {
+    const base = (window.getApiBase ? window.getApiBase() : 'http://localhost/mauheritage/api').replace(/\/+$/, '');
+    log('Testing API at: ' + base, 'info');
+    
+    fetch(base + '/test_connection.php')
+        .then(res => {
+            log('Response status: ' + res.status, 'info');
+            return res.json();
+        })
+        .then(data => {
+            if (data.success) {
+                log('✓ API Working! Total users: ' + data.total_users, 'success');
+            } else {
+                log('✗ API Error: ' + data.message, 'error');
+            }
+        })
+        .catch(err => {
+            log('✗ Connection failed: ' + err.message, 'error');
+        });
+}
+
+function testLogin() {
+    const base = (window.getApiBase ? window.getApiBase() : 'http://localhost/mauheritage/api').replace(/\/+$/, '');
+    log('Testing login endpoint...', 'info');
+    
+    fetch(base + '/user_login.php', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({identifier: 'testuser', password: 'test'})
+    })
+    .then(res => {
+        log('Response status: ' + res.status, 'info');
+        return res.json();
+    })
+    .then(data => {
+        if (data.error) {
+            log('✓ Endpoint responding (expected error for wrong credentials): ' + data.error, 'success');
+        } else if (data.success === false) {
+            log('✓ Endpoint responding (invalid credentials): ' + data.error, 'success');
+        } else {
+            log('Response: ' + JSON.stringify(data), 'info');
+        }
+    })
+    .catch(err => {
+        log('✗ Request failed: ' + err.message, 'error');
+    });
+}
+
+function testRegister() {
+    const base = (window.getApiBase ? window.getApiBase() : 'http://localhost/mauheritage/api').replace(/\/+$/, '');
+    log('Testing register endpoint...', 'info');
+    
+    fetch(base + '/user_register.php', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({username: 'test', email: 'test@test.com', password: 'test'})
+    })
+    .then(res => {
+        log('Response status: ' + res.status, 'info');
+        return res.json();
+    })
+    .then(data => {
+        log('✓ Endpoint responding: ' + JSON.stringify(data), 'success');
+    })
+    .catch(err => {
+        log('✗ Request failed: ' + err.message, 'error');
+    });
+}
+
+function clearStorage() {
+    localStorage.removeItem('user');
+    log('LocalStorage cleared', 'success');
+    document.getElementById('storageUser').innerText = 'None';
+}
+
+function goToAuth() {
+    window.location.href = 'auth.html';
+}
+
+function goToHome() {
+    window.location.href = 'home.html';
+}
+</script>
+
+</body>
+</html>

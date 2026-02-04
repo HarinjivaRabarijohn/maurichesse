@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MauRichesse</title>
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#0b3d2e">
+</head>
+<body>
+<script>
+    // Check if user is logged in
+    try {
+        const user = localStorage.getItem('user');
+        if (user) {
+            // User is logged in, redirect to home
+            window.location.href = 'home.html';
+        } else {
+            // No user logged in, redirect to auth
+            window.location.href = 'auth.html';
+        }
+    } catch (e) {
+        // Error checking localStorage, go to auth
+        window.location.href = 'auth.html';
+    }
+</script>
+<p>Loading…</p>
+</body>
+</html>

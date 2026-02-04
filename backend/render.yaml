@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: maurichesse-api
+    runtime: php
+    buildCommand: "composer install --no-dev"
+    startCommand: "php -S 0.0.0.0:$PORT -t ."
+    envVars:
+      - key: MYSQL_HOST
+        scope: build,runtime
+      - key: MYSQL_PORT
+        scope: build,runtime
+      - key: MYSQL_USER
+        scope: build,runtime
+      - key: MYSQL_PASSWORD
+        scope: build,runtime
+      - key: MYSQL_DB
+        scope: build,runtime
+
+databases:
+  - name: maurichesse-db
+    databaseName: mauheritage
+    user: maurichesse_user

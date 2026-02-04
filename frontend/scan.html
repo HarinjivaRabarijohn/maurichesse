@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Scan QR</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" href="icons/icon-192.png" sizes="192x192">
+<link rel="shortcut icon" href="icons/icon-192.png" type="image/png">
+<script src="https://unpkg.com/html5-qrcode"></script>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="hamburger-menu.css">
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#0b3d2e">
+
+</head>
+
+<body>
+<nav>
+  <a href="home.html" class="brand" aria-label="MauRichesse home">
+    <img src="icons/icon-192.png" alt="MauRichesse logo" class="brand-logo" />
+    <span>MauRichesse</span>
+  </a>
+  <a href="home.html">Explore</a>
+  <a href="scan.html" class="active">Scan</a>
+  <a href="visited.html">Visited</a>
+  <a href="profile.html">Profile</a>
+  <div class="lang-group" style="margin-left:8px;"><label for="clientLangSelect">Language</label><select id="clientLangSelect"><option value="en">English</option><option value="fr">Français</option></select></div>
+  <a href="index.html" class="logout" onclick="return logout(event);">Logout</a>
+</nav>
+<p style="opacity:0.9;font-size:0.95rem;margin:8px 12px;">Tip: allow camera access when prompted to scan QR codes.</p>
+
+<h2>Scan MauRichesse QR</h2>
+<div id="reader"></div>
+<div id="readerControls" style="margin-top:12px;display:flex;gap:8px;align-items:center;">
+  <button id="startScannerBtn" onclick="startScanner()">Start scanner</button>
+  <button id="stopScannerBtn" onclick="stopScanner()" style="display:none;background:transparent;color:var(--muted);border:1px solid rgba(255,255,255,0.04);">Stop</button>
+  <div id="readerStatus" style="color:var(--muted);font-size:0.95rem;margin-left:8px;">Scanner idle</div>
+</div>
+
+<!-- Riddle / Treasure hunt result modal -->
+<div id="scanResultModal" class="modal" aria-hidden="true" role="dialog" aria-labelledby="scanResultTitle">
+  <div class="modal-backdrop" tabindex="-1"></div>
+  <div class="modal-panel riddle-panel" role="document" style="max-width:420px;">
+    <h3 id="scanResultTitle">Treasure found</h3>
+    <p id="scanResultLocation" style="color:var(--accent);font-weight:600;margin-bottom:12px;"></p>
+    <div id="scanResultRiddle" style="padding:14px;background:var(--panel);border-radius:10px;margin-bottom:12px;min-height:60px;"></div>
+    <button id="revealHintBtn" type="button" style="display:none;margin-bottom:12px;">Reveal hint</button>
+    <div id="scanResultHint" style="padding:12px;background:rgba(191,168,106,0.15);border-radius:10px;margin-bottom:12px;display:none;"></div>
+    <button id="claimTreasureBtn" type="button" style="display:none;margin-bottom:10px;">Claim treasure</button>
+    <div id="claimTreasureStatus" style="margin-bottom:12px;color:var(--muted);display:none;"></div>
+    
+    <!-- Photo Upload Section -->
+    <div id="photoUploadContainer" style="display:none;padding:12px;background:rgba(191,168,106,0.1);border-radius:10px;margin-bottom:12px;border:1px solid rgba(191,168,106,0.2);">
+      <label style="display:block;margin-bottom:8px;font-weight:600;font-size:0.95rem;">📸 Upload photo to earn extra points</label>
+      <input type="file" id="photoFileInput" accept="image/*" style="display:block;margin-bottom:8px;width:100%;">
+      <button id="photoUploadBtn" type="button" style="width:100%;padding:8px;">Upload Photo</button>
+      <div id="photoStatus" style="margin-top:8px;font-size:0.9rem;display:none;"></div>
+    </div>
+    
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+      <button id="scanResultShowMap">Show on map</button>
+      <button id="scanResultClose" style="background:transparent;color:var(--muted);border:1px solid rgba(255,255,255,0.04);">Close</button>
+    </div>
+  </div>
+</div>
+
+<script src="hamburger-menu.js?v=2"></script>
+<script src="auth.js?v=2"></script>
+<script src="config.js?v=2"></script>
+<script src="qr.js?v=2"></script>
+<a class="home-quick" href="home.html" title="Home">🏠</a>
+</body>
+</html>

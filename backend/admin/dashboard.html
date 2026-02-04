@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>MauRichesse Admin Dashboard</title>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="hamburger-menu.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+</head>
+<body>
+<div class="dashboard-wrapper">
+
+    <!-- HEADER -->
+    <div class="dashboard-header">
+        <h2>MauRichesse Admin Dashboard</h2>
+        <div style="display:inline-flex;align-items:center;gap:8px;">
+            <label for="adminLangSelect" style="margin-right:6px;">Language</label>
+            <select id="adminLangSelect">
+                <option value="en">English</option>
+                <option value="fr">Français</option>
+            </select>
+        </div>
+        <button onclick="logout()">Logout</button>
+    </div>
+
+    <!-- TABS -->
+    <div class="tabs">
+        <button class="tablink active" onclick="openTab(event,'profile')">Profile</button>
+        <button class="tablink" onclick="openTab(event,'admins')">Admins</button>
+        <button class="tablink" onclick="openTab(event,'categories')">Categories</button>
+        <button class="tablink" onclick="openTab(event,'locations')">Locations</button>
+        <button class="tablink" onclick="openTab(event,'gallery')">Gallery</button>
+        <button class="tablink" onclick="openTab(event,'qr')">QR Codes</button>
+        <button class="tablink" onclick="openTab(event,'trails')">Trails</button>
+        <button class="tablink" onclick="openTab(event,'funfacts')">Riddles & Hints</button>
+        <button class="tablink" onclick="openTab(event,'users')">Users</button>
+        <button class="tablink" onclick="openTab(event,'photos')">Photo Verification</button>
+        <button class="tablink" onclick="openTab(event,'api-docs')">API Docs</button>
+    </div>
+
+    <!-- PROFILE / OVERVIEW with Map -->
+    <div id="profile" class="tab-content" style="display:block;">
+        <h3>Overview</h3>
+        <p><strong>Username:</strong> <span id="adminUsername"></span> &nbsp;|&nbsp; <strong>Status:</strong> Active</p>
+        <div class="admin-map-wrap" style="margin-top:16px;">
+            <div id="adminOverviewMap" style="height:400px;border-radius:12px;overflow:hidden;background:#e8e8e8;"></div>
+            <p class="admin-map-legend" style="margin-top:8px;color:#555;font-size:13px;">Locations (pins) and gallery images (popups at location).</p>
+        </div>
+        <div class="stats-grid">
+            <div class="stat-card">Admins<span id="statAdmins">0</span></div>
+            <div class="stat-card">Categories<span id="statCategories">0</span></div>
+            <div class="stat-card">Locations<span id="statLocations">0</span></div>
+            <div class="stat-card">QR Codes<span id="statQR">0</span></div>
+            <div class="stat-card">Fun Facts<span id="statFunFacts">0</span></div>
+            <div class="stat-card">Users<span id="statUsers">0</span></div>
+            <div class="stat-card">Gallery<span id="statGallery">0</span></div>
+            <div class="stat-card">Trails<span id="statTrails">0</span></div>
+        </div>
+    </div>
+
+    <!-- ADMINS -->
+    <div id="admins" class="tab-content">
+        <h3>Admins</h3>
+        <table id="adminTable">
+            <thead>
+                <tr><th>ID</th><th>Username</th><th>Email</th><th>Created At</th><th>Actions</th></tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+        <input type="text" id="new_admin_username" placeholder="Username">
+        <input type="email" id="new_admin_email" placeholder="Email">
+        <input type="password" id="new_admin_password" placeholder="Password">
+        <button onclick="addAdmin()">Add Admin</button>
+    </div>
+
+    <!-- CATEGORIES -->
+    <div id="categories" class="tab-content">
+        <h3>Categories</h3>
+        <table id="categoryTable">
+            <thead><tr><th>ID</th><th>Name</th><th>Actions</th></tr></thead>
+            <tbody></tbody>
+        </table>
+        <input type="text" id="new_category_name" placeholder="Category Name">
+        <button onclick="addCategory()">Add Category</button>
+    </div>
+
+    <!-- Edit Category Modal -->
+    <div id="editCategoryModal" class="modal" aria-hidden="true" role="dialog" aria-labelledby="editCategoryTitle">
+        <div class="modal-backdrop" data-action="close"></div>
+        <div class="modal-panel" role="document">
+            <h3 id="editCategoryTitle">Edit Category</h3>
+            <input type="hidden" id="edit_category_id">
+            <div id="editCategoryFields">
+                <label for="edit_category_name">Name</label>
+                <input id="edit_category_name" type="text" placeholder="Category name">
+            </div>
+            <div class="modal-actions">
+                <button id="editCategorySave">Save</button>
+                <button id="editCategoryCancel">Cancel</button>
+            </div>
+            <p class="modal-error" id="editCategoryError" role="alert" aria-live="assertive"></p>
+        </div>
+    </div>
+
+    <!-- Generic edit modal (reusable for other tables) -->
+    <div id="genericEditModal" class="modal" aria-hidden="true" role="dialog" aria-labelledby="genericEditTitle">
+        <div class="modal-backdrop" data-action="close"></div>
+        <div class="modal-panel" role="document">
+            <h3 id="genericEditTitle">Edit</h3>
+            <input type="hidden" id="generic_entity">
+            <input type="hidden" id="generic_entity_id">
+            <div id="genericEditFields"></div>
+            <div class="modal-actions">
+                <button id="genericEditSave">Save</button>
+                <button id="genericEditCancel">Cancel</button>
+            </div>
+            <p class="modal-error" id="genericEditError" role="alert" aria-live="assertive"></p>
+        </div>
+    </div>
+
+    <!-- LOCATIONS -->
+    <div id="locations" class="tab-content">
+        <h3>Locations</h3>
+        <table id="locationTable">
+            <thead>
+                <tr>
+                    <th>ID</th><th>Name</th><th>Description</th><th>Lat</th><th>Lng</th><th>Category</th><th>Image</th><th>Actions</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+        <input type="text" id="new_location_name" placeholder="Name">
+        <input type="text" id="new_location_desc" placeholder="Description">
+        <input type="number" step="any" id="new_location_lat" placeholder="Latitude">
+        <input type="number" step="any" id="new_location_lng" placeholder="Longitude">
+        <select id="new_location_cat"><option value="">--Select Category--</option></select>
+        <input type="file" id="new_location_image" accept="image/*">
+        <img id="new_location_image_preview" src="" alt="preview" width="80" style="display:none;margin-left:8px;vertical-align:middle;">
+        <button onclick="addLocation()">Add Location</button>
+    </div>
+
+    <!-- GALLERY (grid) -->
+    <div id="gallery" class="tab-content">
+        <h3>Gallery</h3>
+
+        <!-- grid container — JS will render cards here -->
+        <div id="galleryGrid" class="gallery-grid" role="list" aria-live="polite"></div>
+
+        <!-- Add form (unchanged position & behavior) -->
+        <div class="gallery-add-row">
+            <select id="new_gallery_location"><option value="">--Select Location--</option></select>
+            <input type="file" id="new_gallery_img">
+            <input type="text" id="new_gallery_caption" placeholder="Caption">
+            <button onclick="addGallery()">Add Image</button>
+        </div>
+    </div>
+
+    <!-- QR -->
+    <div id="qr" class="tab-content">
+        <h3>QR Codes</h3>
+        <p class="admin-qr-help" style="color:#555;margin-bottom:12px;font-size:14px;">Add a QR manually or <strong>Generate QR</strong> to create a new code + PNG image for a location (then add a riddle in Riddles &amp; Hints).</p>
+        <table id="qrTable">
+            <thead><tr><th>ID</th><th>QR Code</th><th>Location</th><th>Actions</th></tr></thead>
+            <tbody></tbody>
+        </table>
+        <div class="add-row" style="display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:12px;">
+            <input type="text" id="new_qr_code" placeholder="QR Code (or leave empty when generating)">
+            <select id="new_qr_location"><option value="">--Select Location--</option></select>
+            <button onclick="addQR()">Add QR</button>
+            <button type="button" class="generate-qr-btn" onclick="generateQR()" style="background:linear-gradient(180deg,#2c3e50,#1e2a33);color:#fff;">Generate QR image</button>
+        </div>
+        <div id="qrGenerateResult" style="margin-top:12px;padding:12px;border-radius:10px;background:#f0f7f4;display:none;"></div>
+    </div>
+
+    <!-- TRAILS -->
+    <div id="trails" class="tab-content">
+        <h3>Trails</h3>
+        <table id="trailTable">
+            <thead><tr><th>ID</th><th>Name</th><th>Description</th><th>Start (lat,lng)</th><th>End (lat,lng)</th><th>Actions</th></tr></thead>
+            <tbody></tbody>
+        </table>
+        <div class="add-row">
+            <input type="text" id="new_trail_name" placeholder="Trail name">
+            <input type="text" id="new_trail_desc" placeholder="Description">
+            <input type="number" step="any" id="new_trail_start_lat" placeholder="Start lat">
+            <input type="number" step="any" id="new_trail_start_lng" placeholder="Start lng">
+            <input type="number" step="any" id="new_trail_end_lat" placeholder="End lat">
+            <input type="number" step="any" id="new_trail_end_lng" placeholder="End lng">
+            <button onclick="addTrail()">Add Trail</button>
+        </div>
+    </div>
+
+    <!-- RIDDLES & HINTS (ex Fun Facts) -->
+    <div id="funfacts" class="tab-content">
+        <h3>Riddles & Hints</h3>
+        <table id="funFactTable">
+            <thead><tr><th>ID</th><th>QR</th><th>Fact Text</th><th>Hint 1</th><th>Hint 2</th><th>Hint 3</th><th>Actions</th></tr></thead>
+            <tbody></tbody>
+        </table>
+        <select id="new_funfact_qr"><option value="">--Select QR--</option></select>
+        <input type="text" id="new_funfact_text" placeholder="Fun Fact / Riddle">
+        <input type="text" id="new_funfact_hint" placeholder="Hint 1">
+        <input type="text" id="new_funfact_hint_2" placeholder="Hint 2">
+        <input type="text" id="new_funfact_hint_3" placeholder="Hint 3">
+        <button onclick="addFunFact()">Add Fun Fact</button>
+    </div>
+
+    <!-- USERS -->
+    <div id="users" class="tab-content">
+        <h3>Users</h3>
+        <table id="userTable">
+            <thead><tr><th>ID</th><th>Username</th><th>Email</th><th>Points</th><th>Created At</th><th>Actions</th></tr></thead>
+            <tbody></tbody>
+        </table>
+
+        <div class="add-row">
+            <input type="text" id="new_user_username" placeholder="Username">
+            <input type="email" id="new_user_email" placeholder="Email">
+            <input type="password" id="new_user_password" placeholder="Password">
+            <button id="addUserBtn" onclick="addUser()">Add User</button>
+        </div>
+    </div>
+
+<!-- TRAILS -->
+    <div id="trails" class="tab-content">
+        <h3>Trails</h3>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div>
+                <table id="trailTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Description</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+                <input type="text" id="new_trail_name" placeholder="Trail Name">
+                <input type="text" id="new_trail_description" placeholder="Description">
+                <input type="number" step="any" id="new_trail_start_lat" placeholder="Start Latitude">
+                <input type="number" step="any" id="new_trail_start_lng" placeholder="Start Longitude">
+                <input type="number" step="any" id="new_trail_end_lat" placeholder="End Latitude">
+                <input type="number" step="any" id="new_trail_end_lng" placeholder="End Longitude">
+                <button onclick="addTrail()">Add Trail</button>
+            </div>
+            <div>
+                <div id="trailMap" style="height: 400px; border-radius: 8px;"></div>
+                <p style="margin-top: 8px; color: var(--muted); font-size: 0.9rem;">Trail visualization map</p>
+            </div>
+        </div>
+    </div>
+
+<!-- PHOTO VERIFICATION -->
+    <div id="photos" class="tab-content">
+        <h3>Photo Verification</h3>
+        <p style="color: var(--muted); margin-bottom: 20px;">Review and verify user-submitted photos from location visits.</p>
+        
+        <div id="pendingPhotosContainer">
+            <div style="padding: 40px; text-align: center; color: var(--muted);">
+                <div style="font-size: 3rem; margin-bottom: 16px;">📸</div>
+                <p>Loading pending photos...</p>
+            </div>
+        </div>
+    </div>
+
+<!-- API DOCUMENTATION -->
+    <div id="api-docs" class="tab-content">
+        <h3>API Documentation</h3>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div>
+                <h4>Interactive API Testing</h4>
+                <p style="color: var(--muted); margin-bottom: 16px;">Test all API endpoints directly from your admin dashboard.</p>
+                
+                <div style="margin-bottom: 16px;">
+                    <button onclick="loadSwaggerUI()" style="background: var(--accent); color: #000; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; margin-right: 10px;">
+                        📚 Load API Documentation
+                    </button>
+                    <button onclick="refreshAPIDocs()" style="background: rgba(255,255,255,0.1); color: var(--ivory); border: 1px solid rgba(255,255,255,0.2); padding: 10px 20px; border-radius: 6px; cursor: pointer;">
+                        🔄 Refresh
+                    </button>
+                </div>
+                
+                <div style="margin-bottom: 16px;">
+                    <label for="apiBaseUrl" style="display: block; margin-bottom: 4px; color: var(--ivory);">API Base URL:</label>
+                    <input type="text" id="apiBaseUrl" value="../api" style="width: 100%; padding: 8px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; color: var(--ivory);">
+                    <small style="color: var(--muted); font-size: 0.8rem; margin-top: 4px; display: block;">Use relative path (../api) or full URL (http://localhost/mauheritage/api)</small>
+                </div>
+                
+                <div id="swagger-ui-container" style="border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; height: 600px; overflow: hidden; background: #fff;">
+                    <div style="padding: 20px; text-align: center; color: #666;">
+                        <div style="font-size: 3rem; margin-bottom: 16px;">📚</div>
+                        <p>Click "Load API Documentation" to start testing APIs</p>
+                        <p style="font-size: 0.9rem; margin-top: 8px;">Interactive Swagger UI will appear here</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div>
+                <h4>API Endpoints Overview</h4>
+                <div style="background: rgba(255,255,255,0.05); border-radius: 8px; padding: 16px; margin-bottom: 16px;">
+                    <h5 style="margin-top: 0; color: var(--accent);">🔐 Authentication</h5>
+                    <ul style="list-style: none; padding: 0; margin: 8px 0;">
+                        <li><code style="background: rgba(0,0,0,0.2); padding: 2px 6px; border-radius: 3px;">POST /user_login.php</code> - User login</li>
+                        <li><code style="background: rgba(0,0,0,0.2); padding: 2px 6px; border-radius: 3px;">POST /admin_login.php</code> - Admin login</li>
+                    </ul>
+                </div>
+                
+                <div style="background: rgba(255,255,255,0.05); border-radius: 8px; padding: 16px; margin-bottom: 16px;">
+                    <h5 style="margin-top: 0; color: var(--accent);">👥 Users & Admins</h5>
+                    <ul style="list-style: none; padding: 0; margin: 8px 0;">
+                        <li><code style="background: rgba(0,0,0,0.2); padding: 2px 6px; border-radius: 3px;">GET/POST /user.php</code> - User management</li>
+                        <li><code style="background: rgba(0,0,0,0.2); padding: 2px 6px; border-radius: 3px;">GET/POST /admin.php</code> - Admin management</li>
+                    </ul>
+                </div>
+                
+                <div style="background: rgba(255,255,255,0.05); border-radius: 8px; padding: 16px; margin-bottom: 16px;">
+                    <h5 style="margin-top: 0; color: var(--accent);">📍 Content Management</h5>
+                    <ul style="list-style: none; padding: 0; margin: 8px 0;">
+                        <li><code style="background: rgba(0,0,0,0.2); padding: 2px 6px; border-radius: 3px;">GET/POST /category.php</code> - Categories</li>
+                        <li><code style="background: rgba(0,0,0,0.2); padding: 2px 6px; border-radius: 3px;">GET/POST /location.php</code> - Locations</li>
+                        <li><code style="background: rgba(0,0,0,0.2); padding: 2px 6px; border-radius: 3px;">GET/POST /gallery.php</code> - Gallery</li>
+                    </ul>
+                </div>
+                
+                <div style="background: rgba(255,255,255,0.05); border-radius: 8px; padding: 16px; margin-bottom: 16px;">
+                    <h5 style="margin-top: 0; color: var(--accent);">🎯 Game Features</h5>
+                    <ul style="list-style: none; padding: 0; margin: 8px 0;">
+                        <li><code style="background: rgba(0,0,0,0.2); padding: 2px 6px; border-radius: 3px;">GET/POST /qr.php</code> - QR Codes</li>
+                        <li><code style="background: rgba(0,0,0,0.2); padding: 2px 6px; border-radius: 3px;">GET/POST /fun_fact.php</code> - Riddles & Hints</li>
+                        <li><code style="background: rgba(0,0,0,0.2); padding: 2px 6px; border-radius: 3px;">GET/POST /trail.php</code> - Trails</li>
+                        <li><code style="background: rgba(0,0,0,0.2); padding: 2px 6px; border-radius: 3px;">GET/POST /badge.php</code> - Badges</li>
+                    </ul>
+                </div>
+                
+                <div style="background: rgba(255,255,255,0.05); border-radius: 8px; padding: 16px;">
+                    <h5 style="margin-top: 0; color: var(--accent);">📊 Features</h5>
+                    <ul style="list-style: none; padding: 0; margin: 8px 0;">
+                        <li><code style="background: rgba(0,0,0,0.2); padding: 2px 6px; border-radius: 3px;">GET /leaderboard.php</code> - Rankings</li>
+                        <li><code style="background: rgba(0,0,0,0.2); padding: 2px 6px; border-radius: 3px;">GET /get_vapid_public.php</code> - Push Notifications</li>
+                    </ul>
+                </div>
+                
+                <div style="margin-top: 20px; padding: 16px; background: rgba(191,168,106,0.1); border-radius: 8px; border: 1px solid var(--accent);">
+                    <h5 style="margin-top: 0; color: var(--accent);">🔗 External Links</h5>
+                    <div style="margin-top: 12px;">
+                        <a href="https://editor.swagger.io/" target="_blank" style="display: inline-block; color: var(--accent); text-decoration: none; margin-right: 16px;">
+                            📝 Swagger Editor
+                        </a>
+                        <button onclick="exportOpenAPI()" style="background: var(--accent); color: #000; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.9rem;">
+                            📥 Export OpenAPI
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="../../frontend/config.js"></script>
+<script src="hamburger-menu.js"></script>
+<script src="js/admin.js"></script>
+<script src="js/category.js"></script>
+<script src="js/location.js"></script>
+<script src="js/qr.js"></script>
+<script src="js/gallery.js"></script>
+<script src="js/trail.js"></script>
+<script src="js/funfact.js"></script>
+<script src="js/user.js?v=2"></script>
+<script src="js/photo_verification.js"></script>
+<script src="js/api-docs.js"></script>
+<script src="js/dashboard.js?v=2"></script>
+<script>
+function loadAdminOverviewMap() {
+    var el = document.getElementById('adminOverviewMap');
+    if (!el || typeof L === 'undefined') return;
+    if (window._adminMap) { window._adminMap.remove(); window._adminMap = null; }
+    var map = L.map('adminOverviewMap', { center: [-20.35, 57.55], zoom: 10 });
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OSM' }).addTo(map);
+    var bounds = [];
+    fetch('../api/location.php?action=list').then(function(r) { return r.json(); }).then(function(locs) {
+      (locs || []).forEach(function(loc) {
+        var lat = parseFloat(loc.latitude); var lng = parseFloat(loc.longitude);
+        if (!isFinite(lat) || !isFinite(lng)) return;
+        bounds.push([lat, lng]);
+        var img = loc.image || loc.image_path || '';
+        var imgUrl = img ? (img.indexOf('uploads/') === 0 ? '../' + img : img) : '';
+        var popup = '<b>' + (loc.name || '') + '</b><br>' + (loc.address || '') + (imgUrl ? '<br><img src="' + imgUrl + '" style="max-width:200px;height:120px;object-fit:cover;margin-top:6px;" onerror="this.style.display=\'none\'">' : '');
+        L.marker([lat, lng]).addTo(map).bindPopup(popup);
+      });
+      fetch('../api/gallery.php?action=list').then(function(r) { return r.json(); }).then(function(gallery) {
+        (gallery || []).forEach(function(g) {
+          var loc = (locs || []).find(function(l) { return String(l.location_id) === String(g.location_id); });
+          if (loc && isFinite(parseFloat(loc.latitude)) && isFinite(parseFloat(loc.longitude))) {
+            var u = g.image_path || g.image || '';
+            u = u.indexOf('uploads/') === 0 ? '../' + u : u;
+            L.marker([parseFloat(loc.latitude), parseFloat(loc.longitude)], { icon: L.divIcon({ className: 'admin-gallery-dot', html: '<span style="background:#1e6f4e;width:12px;height:12px;border-radius:50%;display:block;border:2px solid #fff;"></span>', iconSize: [12, 12] }) }).addTo(map).bindPopup('<img src="' + u + '" style="max-width:220px;max-height:160px;object-fit:cover;" onerror="this.parentElement.innerHTML=\'No image\'">' + (g.caption ? '<br><small>' + g.caption + '</small>' : ''));
+          }
+        });
+        if (bounds.length) map.fitBounds(bounds, { padding: [30, 30] });
+      }).catch(function() { if (bounds.length) map.fitBounds(bounds, { padding: [30, 30] }); });
+    }).catch(function() {});
+  window._adminMap = map;
+}
+document.addEventListener('DOMContentLoaded', function() {
+  if (document.getElementById('profile') && document.getElementById('adminOverviewMap')) setTimeout(loadAdminOverviewMap, 400);
+});
+</script>
+</body>
+</html>

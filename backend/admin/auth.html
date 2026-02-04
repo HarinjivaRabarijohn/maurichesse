@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>MauRichesse | Login</title>
+<link rel="stylesheet" href="login.css">
+</head>
+
+<body>
+
+<div class="auth-container">
+
+    <h1 class="welcome">Welcome to MauRichesse</h1>
+    <p class="subtitle">Discover Mauritius. Preserve its legacy.</p>
+
+    <div class="tabs">
+       <button class="tab active" data-tab="login" onclick="showTab('login')">Login</button>
+       <button class="tab" data-tab="register" onclick="showTab('register')">Register</button>
+
+    </div>
+
+    <!-- LOGIN -->
+    <div id="login" class="tab-content active">
+        <input type="text" id="loginIdentifier" placeholder="Username or Email">
+        <div class="password-input-container">
+            <input type="password" id="loginPassword" placeholder="Password">
+            <button type="button" class="password-toggle" onclick="togglePassword('loginPassword', this)" aria-label="Toggle password visibility">
+                <span class="eye-icon">👁️</span>
+            </button>
+        </div>
+        <button onclick="login()">Login</button>
+        <p class="error" id="loginError"></p>
+    </div>
+
+    <!-- REGISTER (USER ONLY) -->
+    <div id="register" class="tab-content">
+        <input type="text" id="regUsername" placeholder="Username">
+        <input type="email" id="regEmail" placeholder="Email">
+        <div class="password-input-container">
+            <input type="password" id="regPassword" placeholder="Password">
+            <button type="button" class="password-toggle" onclick="togglePassword('regPassword', this)" aria-label="Toggle password visibility">
+                <span class="eye-icon">👁️</span>
+            </button>
+        </div>
+        <button onclick="register()">Create Account</button>
+        <p class="error" id="registerError"></p>
+    </div>
+
+</div>
+
+<script src="js/auth.js"></script>
+<script>
+// Password visibility toggle function
+function togglePassword(inputId, button) {
+    const passwordInput = document.getElementById(inputId);
+    const eyeIcon = button.querySelector('.eye-icon');
+    
+    if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        eyeIcon.textContent = '🙈';
+        button.setAttribute('aria-label', 'Hide password');
+    } else {
+        passwordInput.type = 'password';
+        eyeIcon.textContent = '👁️';
+        button.setAttribute('aria-label', 'Show password');
+    }
+}
+</script>
