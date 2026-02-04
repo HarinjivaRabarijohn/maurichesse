@@ -21,7 +21,17 @@
 3. Fill in:
    - **Repository name:** `maurichesse`
    - **Description:** "MauRichesse - Heritage discovery app"
-   - **Public** (so Render can access it)
+   - **Public** cd C:\maurichesse
+
+git config --global user.name "Your Name"
+git config --global user.email "your.email@example.com"
+
+git init
+git add .
+git commit -m "MauRichesse - Initial deployment"
+git branch -M main
+git remote add origin https://github.com/YOUR_USERNAME/maurichesse.git
+git push -u origin main(so Render can access it)
 4. Click **"Create repository"**
 5. You'll see an empty repo with setup instructions
 
@@ -42,9 +52,10 @@ You have 2 options:
 
 3. **Initialize Git (do this only once):**
    ```bash
-   git config --global user.name "Your Name"
-   git config --global user.email "your.email@example.com"
+   git config --global user.name "KaMiPo"
+   git config --global user.email "harinjiva.rabarijohn@umail.utm.ac.mu"
    ```
+   ✅ Already configured!
 
 4. **Push your code to GitHub:**
    ```bash
@@ -94,42 +105,32 @@ You have 2 options:
 4. Authorize GitHub connection
 5. Complete registration
 
-### Step 2.2: Create MySQL Database
-1. On Render dashboard, click **"New +"** (top right)
-2. Click **"MySQL"**
-3. Fill in:
-   - **Name:** `maurichesse-db`
-   - **Database:** `mauheritage`
-   - **User:** `maurichesse_user`
-   - Leave password blank (auto-generated)
-4. Click **"Create Database"**
-5. Wait 2-3 minutes for creation
-6. When ready, click the database name
-7. **IMPORTANT: Save these values:**
+### Step 2.2: Create MariaDB Database (External Provider)
+Render does **not** provide MySQL/MariaDB. To keep MariaDB, create it with a managed provider (recommended: **Aiven**).
+
+1. Go to **https://console.aiven.io**
+2. Click **"Create service"**
+3. Select **MariaDB**
+4. Choose the closest region
+5. Pick the **Free** plan (or the smallest available)
+6. Name it **`maurichesse-db`**
+7. Create the service and wait 2–3 minutes
+8. Open the service and **copy these values**:
    ```
-   Host: (something like abc123.render.com)
-   Port: 3306
-   User: maurichesse_user
-   Password: (auto-generated, shown once)
-   Database: mauheritage
+   Host
+   Port
+   Database name
+   Username
+   Password
    ```
-   Screenshot them or copy to a text file!
+   Save them safely!
 
 ### Step 2.3: Import Database Schema
-1. In the database page, click **"Info"** tab
-2. Look for **"MySQL Credentials"** or **"Connection String"**
-3. Click **"Connect"** button
-4. You'll get connection details
-5. Use any MySQL client (or phpMyAdmin if available) to connect
-6. Once connected, import `maurichesse.sql`:
-   - Go to your backend folder: `C:\maurichesse\backend\db\`
-   - Open `mauheritage.sql`
-   - Copy all the SQL code
-   - Paste it into the MySQL client and execute
-
-   **Alternative (Easier):**
-   - Use an online tool: https://www.phpmyadmin.net/
-   - Or ask Render support to import for you
+1. Use a MySQL/MariaDB client (HeidiSQL, MySQL Workbench, or DBeaver)
+2. Connect using the credentials from Step 2.2
+3. Import the schema file:
+   - File: `C:\maurichesse\backend\db\mauheritage.sql`
+   - Run the full script to create all tables
 
 ### Step 2.4: Deploy Backend API
 1. On Render dashboard, click **"New +"** (top right)
@@ -153,7 +154,7 @@ You have 2 options:
    | MYSQL_PORT | 3306 |
    | MYSQL_USER | maurichesse_user |
    | MYSQL_PASSWORD | (your password from step 2.2) |
-   | MYSQL_DB | mauheritage |
+   | MYSQL_DATABASE | mauheritage |
 
 7. Click **"Create Web Service"**
 8. Wait 3-5 minutes for deployment
